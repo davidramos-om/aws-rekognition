@@ -7,6 +7,12 @@ const rekognitionClient = new AWS.Rekognition({
   secretAccessKey: appConfig.secretAccessKey,
 });
 
+const textractClient = new AWS.Textract({
+  region: appConfig.region,
+  accessKeyId: appConfig.accessKeyId,
+  secretAccessKey: appConfig.secretAccessKey,
+});
+
 export async function detectLabels(
   imageUrl: string
 ): Promise<AWS.Rekognition.Labels> {
@@ -59,4 +65,35 @@ export async function detectText(
 
   const response = await rekognitionClient.detectText(params).promise();
   return response.TextDetections || [];
+}
+
+export async function detectFaces(
+  imageUrl: string
+): Promise<AWS.Rekognition.FaceDetailList> {
+  const params: AWS.Rekognition.DetectFacesRequest = {
+    Image: {
+      S3Object: {
+        Bucket: appConfig.bucketName,
+        Name: imageUrl.split("/").pop()!,
+      },
+    },
+    Attributes: ["ALL"],
+  };
+
+  const response = await rekognitionClient.detectFaces(params).promise();
+  return response.FaceDetails || [];
+}
+
+export async function textExtract(imageUrl: string) {
+  const params: AWS.Textract.DetectDocumentTextRequest = {
+    Document: {
+      S3Object: {
+        Bucket: appConfig.bucketName,
+        Name: imageUrl.split("/").pop()!,
+      },
+    },
+  };
+
+  const response = await textractClient.detectDocumentText(params).promise();
+  return response;
 }

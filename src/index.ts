@@ -5,7 +5,12 @@ import cors from "cors";
 
 import { appConfig } from "./config";
 import { uploadToS3, getS3Url } from "./s3";
-import { detectLabels, detectText } from "./awsRekognition";
+import {
+  detectFaces,
+  detectLabels,
+  detectText,
+  textExtract,
+} from "./awsRekognition";
 
 // enable cors
 const app = express();
@@ -59,8 +64,18 @@ app.get("/analyze", async (req, res) => {
     console.log("📍 Detecting text in the image");
     const texts = await detectText(imageUrl as string);
 
+    // Detect faces in the image
+    console.log("📍 Detecting faces in the image");
+    const faces = await detectFaces(imageUrl as string);
+
+    // Extract texts from the text detection response
+    console.log(
+      "📍 Extracting texts from text detection using AWS TextExtract"
+    );
+    const extractedTexts = await textExtract(imageUrl as string);
+
     console.log("📍 Sending back detected labels to client");
-    res.json({ labels, texts });
+    res.json({ labels, texts, faces, extractedTexts });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
