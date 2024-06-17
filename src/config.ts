@@ -9,8 +9,6 @@ const appConfig = {
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
 };
 
-console.dir({ appConfig });
-
 const awsConfig = new AWS.Config({
   region: appConfig.region,
   accessKeyId: appConfig.accessKeyId,
